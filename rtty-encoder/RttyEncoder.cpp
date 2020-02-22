@@ -23,9 +23,10 @@ static const unsigned char SPACE_SYM = 2;
 
 namespace kc1fsz {
 
-RttyEncoder::RttyEncoder(SystemEnv* sysEnv, VFOInterface* vfo)
+RttyEncoder::RttyEncoder(SystemEnv* sysEnv, VFOInterface* vfo, StatusIndicator* ind)
 :	_sysEnv(sysEnv),
 	_vfo(vfo),
+	_ind(ind),
 	_shiftState(false),
 	_outStreamSize(0),
 	_outStreamPtr(0),
@@ -59,12 +60,18 @@ void RttyEncoder::_startSymbol(unsigned char symbol) {
 	// The RTTY "operating frequency" generally coincides with the mark frequency.
 	if (symbol == 0) {
 		_vfo->setOutputEnabled(false);
+		if (_ind)
+			_ind->setState(false);
 	} else if (symbol == MARK_SYM) {
 		_vfo->setOutputEnabled(true);
 		_vfo->setFrequency(_baseFreqHz);
+		if (_ind)
+			_ind->setState(true);
 	} else if (symbol == SPACE_SYM) {
 		_vfo->setOutputEnabled(true);
 		_vfo->setFrequency(_baseFreqHz - shiftHz);
+		if (_ind)
+			_ind->setState(false);
 	}
 }
 

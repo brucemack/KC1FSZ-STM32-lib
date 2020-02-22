@@ -11,6 +11,7 @@
 #include "SystemEnv.h"
 #include "VFOInterface.h"
 #include "Pollable.h"
+#include "StatusIndicator.h"
 
 namespace kc1fsz {
 
@@ -18,7 +19,7 @@ namespace kc1fsz {
 
 	public:
 
-		RttyEncoder(SystemEnv* sysEnv, VFOInterface* vfo);
+		RttyEncoder(SystemEnv* sysEnv, VFOInterface* vfo, StatusIndicator* ind);
 		virtual ~RttyEncoder();
 
 		/**
@@ -43,9 +44,10 @@ namespace kc1fsz {
 
 		SystemEnv* const _sysEnv;
 		VFOInterface* const _vfo;
+		StatusIndicator* const _ind;
 		bool _shiftState;
 		unsigned int _baseFreqHz;
-		static const unsigned int _outStreamCapacity = 2048;
+		static const unsigned int _outStreamCapacity = 4096;
 		unsigned char _outStream[_outStreamCapacity];
 		unsigned int _outStreamSize;
 		unsigned int _outStreamPtr;
