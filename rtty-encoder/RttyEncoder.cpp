@@ -41,11 +41,17 @@ RttyEncoder::~RttyEncoder() {
  * machine.
  */
 void RttyEncoder::poll() {
-	if (_outStreamSize != 0 &&
-		_sysEnv->getTimeMs() - _symbolStartMs >= _symbolDurationMs) {
+
+	if (_outStreamSize == 0)
+		return;
+
+	uint32_t now = _sysEnv->getTimeMs();
+	uint32_t dur =  now - _symbolStartMs;
+
+	if (dur >= _symbolDurationMs) {
 		// Start sounding the symbol
 		_startSymbol(_outStream[_outStreamPtr]);
-		_symbolStartMs = _sysEnv->getTimeMs();
+		_symbolStartMs = now;
 		// Advance to the next symbol
 		_outStreamPtr++;
 		// Wrap around

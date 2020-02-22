@@ -1,12 +1,14 @@
 #ifndef _SystemEnv_h
 #define _SystemEnv_h
 
+#include <stdint.h>
+
 namespace kc1fsz {
 
 	class SystemEnv {
 	public:
 
-		virtual long getTimeMs() = 0;
+		virtual uint32_t getTimeMs() = 0;
 	};
 };
 

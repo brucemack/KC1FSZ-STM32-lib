@@ -8,6 +8,7 @@
 #ifndef SRC_RTTYENCODER_H_
 #define SRC_RTTYENCODER_H_
 
+#include <stdint.h>
 #include "SystemEnv.h"
 #include "VFOInterface.h"
 #include "Pollable.h"
@@ -51,8 +52,8 @@ namespace kc1fsz {
 		unsigned char _outStream[_outStreamCapacity];
 		unsigned int _outStreamSize;
 		unsigned int _outStreamPtr;
-		unsigned int _symbolDurationMs;
-		unsigned long _symbolStartMs;
+		uint32_t _symbolDurationMs;
+		uint32_t _symbolStartMs;
 		int _delaySeconds;
 	};
 };
