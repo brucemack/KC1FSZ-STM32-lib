@@ -30,10 +30,22 @@ RttyEncoder::RttyEncoder(SystemEnv* sysEnv, VFOInterface* vfo, StatusIndicator* 
 	_shiftState(false),
 	_outStreamSize(0),
 	_outStreamPtr(0),
-	_symbolDurationMs(baudDelayMs) {
+	_symbolDurationMs(baudDelayMs),
+	_stateMs(0),
+	_delaySeconds(30),
+	_state(State::IDLE) {
 }
 
 RttyEncoder::~RttyEncoder() {
+}
+
+void RttyEncoder::start() {
+	_state = State::TRANSMISSION;
+	_outStreamPtr = 0;
+}
+
+void RttyEncoder::stop() {
+	_state = State::IDLE;
 }
 
 /**
@@ -42,21 +54,38 @@ RttyEncoder::~RttyEncoder() {
  */
 void RttyEncoder::poll() {
 
-	if (_outStreamSize == 0)
+	const uint32_t now = _sysEnv->getTimeMs();
+
+	if (_state == State::IDLE) {
 		return;
-
-	uint32_t now = _sysEnv->getTimeMs();
-	uint32_t dur =  now - _symbolStartMs;
-
-	if (dur >= _symbolDurationMs) {
-		// Start sounding the symbol
-		_startSymbol(_outStream[_outStreamPtr]);
-		_symbolStartMs = now;
-		// Advance to the next symbol
-		_outStreamPtr++;
-		// Wrap around
-		if (_outStreamPtr == _outStreamSize) {
+	} else if (_state == State::DELAY) {
+		// Finished waiting?
+		if (now - _stateMs > (uint32_t)(_delaySeconds * 1000)) {
+			_state = State::TRANSMISSION;
 			_outStreamPtr = 0;
+		}
+	} else if (_state == State::TRANSMISSION) {
+
+		if (_outStreamSize == 0) {
+			_state = State::DELAY;
+			_stateMs = now;
+			return;
+		}
+
+		uint32_t dur =  now - _symbolStartMs;
+
+		// Ready to move to the next symbol?
+		if (_outStreamPtr == 0 || dur >= _symbolDurationMs) {
+			// Start sounding the symbol
+			_symbolStartMs = now;
+			_startSymbol(_outStream[_outStreamPtr]);
+			// Advance to the next symbol
+			_outStreamPtr++;
+			// End of message?
+			if (_outStreamPtr == _outStreamSize) {
+				_state = State::DELAY;
+				_stateMs = now;
+			}
 		}
 	}
 }

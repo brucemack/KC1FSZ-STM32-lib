@@ -32,6 +32,20 @@ namespace kc1fsz {
 
 		void setFreq(unsigned int freqHz);
 		void queueMessage(const char* message);
+
+		/**
+		 * Starts the message loop
+		 */
+		void start();
+
+		/**
+		 * Stops the message loop
+		 */
+		void stop();
+
+		/**
+		 * This is the seconds delay between transmissions
+		 */
 		void setDelay(int delaySeconds);
 
 	private:
@@ -53,8 +67,20 @@ namespace kc1fsz {
 		unsigned int _outStreamSize;
 		unsigned int _outStreamPtr;
 		uint32_t _symbolDurationMs;
+		// The time when the current symbol started
 		uint32_t _symbolStartMs;
+		// Used for managing state transitions
+		uint32_t _stateMs;
+		// How long we wait between messages
 		int _delaySeconds;
+
+		enum State {
+			IDLE,
+			DELAY,
+			TRANSMISSION
+		};
+
+		State _state;
 	};
 };
 

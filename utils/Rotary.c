@@ -1,5 +1,13 @@
 #include "Rotary.h"
-#include "main.h"
+
+#ifdef STM32F1
+	#include "stm32f1xx_hal.h"
+#endif
+
+#if defined(STM32F4)
+	#include "stm32f4xx_hal.h"
+#endif
+
 
 /*
  * The below state table has, for each state (row), the new state
@@ -64,11 +72,13 @@ void Rotary_init() {
 }
 
 static int read0() {
-	return HAL_GPIO_ReadPin(ENC0_GPIO_Port, ENC0_Pin);
+	//return HAL_GPIO_ReadPin(ENC0_GPIO_Port, ENC0_Pin);
+	return 0;
 }
 
 static int read1() {
-	return HAL_GPIO_ReadPin(ENC1_GPIO_Port, ENC1_Pin);
+	//return HAL_GPIO_ReadPin(ENC1_GPIO_Port, ENC1_Pin);
+	return 0;
 }
 
 unsigned char Rotary_process() {
