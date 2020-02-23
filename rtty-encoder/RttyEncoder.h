@@ -30,8 +30,18 @@ namespace kc1fsz {
 		 */
 		void poll();
 
+		/**
+		 * Sets the base frequency for the transmission.
+		 */
 		void setFreq(unsigned int freqHz);
+
+		/**
+		 * Enqueues the text message to be transmitted.  Nothing will actually
+		 * be transmitted until start is called.
+		 */
 		void queueMessage(const char* message);
+
+		void setLoop(bool l);
 
 		/**
 		 * Starts the message loop
@@ -62,7 +72,7 @@ namespace kc1fsz {
 		StatusIndicator* const _ind;
 		bool _shiftState;
 		unsigned int _baseFreqHz;
-		static const unsigned int _outStreamCapacity = 4096;
+		static const unsigned int _outStreamCapacity = 5000;
 		unsigned char _outStream[_outStreamCapacity];
 		unsigned int _outStreamSize;
 		unsigned int _outStreamPtr;
@@ -73,6 +83,8 @@ namespace kc1fsz {
 		uint32_t _stateMs;
 		// How long we wait between messages
 		int _delaySeconds;
+		// Controls whether an endless loop is used
+		bool _loop;
 
 		enum State {
 			IDLE,

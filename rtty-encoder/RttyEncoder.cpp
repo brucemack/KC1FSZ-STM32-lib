@@ -33,6 +33,7 @@ RttyEncoder::RttyEncoder(SystemEnv* sysEnv, VFOInterface* vfo, StatusIndicator* 
 	_symbolDurationMs(baudDelayMs),
 	_stateMs(0),
 	_delaySeconds(30),
+	_loop(false),
 	_state(State::IDLE) {
 }
 
@@ -54,6 +55,11 @@ void RttyEncoder::stop() {
 	_ind->setMessage("Idle");
 }
 
+void RttyEncoder::setLoop(bool l) {
+	_loop = l;
+}
+
+
 /**
  * This function is called periodically.  It advances through a state
  * machine.
@@ -69,7 +75,7 @@ void RttyEncoder::poll() {
 		if (now - _stateMs > (uint32_t)(_delaySeconds * 1000)) {
 			_state = State::TRANSMISSION;
 			_outStreamPtr = 0;
-			_ind->setMessage("TX");
+			_ind->setMessage("Sending");
 		}
 	} else if (_state == State::TRANSMISSION) {
 
@@ -93,9 +99,14 @@ void RttyEncoder::poll() {
 			if (_outStreamPtr == _outStreamSize) {
 				// Shut off the carrier
 				_vfo->setOutputEnabled(false);
-				_state = State::DELAY;
-				_stateMs = now;
-				_ind->setMessage("Waiting");
+				if (_loop) {
+					_state = State::DELAY;
+					_stateMs = now;
+					_ind->setMessage("Waiting");
+				} else {
+					_state = State::IDLE;
+					_ind->setMessage("Done");
+				}
 			}
 		}
 	}
