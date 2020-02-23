@@ -40,12 +40,14 @@ RttyEncoder::~RttyEncoder() {
 }
 
 void RttyEncoder::start() {
-	_state = State::TRANSMISSION;
-	_outStreamPtr = 0;
+	_state = State::DELAY;
+	_stateMs = _sysEnv->getTimeMs();
+	_ind->setMessage("Waiting");
 }
 
 void RttyEncoder::stop() {
 	_state = State::IDLE;
+	_ind->setMessage("Idle");
 }
 
 /**
@@ -63,12 +65,14 @@ void RttyEncoder::poll() {
 		if (now - _stateMs > (uint32_t)(_delaySeconds * 1000)) {
 			_state = State::TRANSMISSION;
 			_outStreamPtr = 0;
+			_ind->setMessage("TX");
 		}
 	} else if (_state == State::TRANSMISSION) {
 
 		if (_outStreamSize == 0) {
 			_state = State::DELAY;
 			_stateMs = now;
+			_ind->setMessage("Waiting");
 			return;
 		}
 
@@ -85,6 +89,7 @@ void RttyEncoder::poll() {
 			if (_outStreamPtr == _outStreamSize) {
 				_state = State::DELAY;
 				_stateMs = now;
+				_ind->setMessage("Waiting");
 			}
 		}
 	}
@@ -96,17 +101,17 @@ void RttyEncoder::_startSymbol(unsigned char symbol) {
 	if (symbol == 0) {
 		_vfo->setOutputEnabled(false);
 		if (_ind)
-			_ind->setState(false);
+			_ind->setLight(false);
 	} else if (symbol == MARK_SYM) {
 		_vfo->setOutputEnabled(true);
 		_vfo->setFrequency(_baseFreqHz);
 		if (_ind)
-			_ind->setState(true);
+			_ind->setLight(true);
 	} else if (symbol == SPACE_SYM) {
 		_vfo->setOutputEnabled(true);
 		_vfo->setFrequency(_baseFreqHz - shiftHz);
 		if (_ind)
-			_ind->setState(false);
+			_ind->setLight(false);
 	}
 }
 
