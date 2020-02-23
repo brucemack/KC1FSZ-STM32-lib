@@ -17,13 +17,13 @@
 #define SI_PLL_RESET 177
 #define SI_CRYSTAL_INTERNAL_LOAD_CAPACITANCE 183
 
-#define SI_R_DIV_1		0b00000000			// R-division ratio definitions
-#define SI_R_DIV_2		0b00010000
-#define SI_R_DIV_4		0b00100000
-#define SI_R_DIV_8		0b00110000
-#define SI_R_DIV_16		0b01000000
-#define SI_R_DIV_32		0b01010000
-#define SI_R_DIV_64		0b01100000
+#define SI_R_DIV_1			0b00000000			// R-division ratio definitions
+#define SI_R_DIV_2			0b00010000
+#define SI_R_DIV_4			0b00100000
+#define SI_R_DIV_8			0b00110000
+#define SI_R_DIV_16			0b01000000
+#define SI_R_DIV_32			0b01010000
+#define SI_R_DIV_64			0b01100000
 #define SI_R_DIV_128		0b01110000
 
 #define SI_CLK_SRC_PLL_A	0b00000000
@@ -128,7 +128,7 @@ void si5351aOutputOff(uint8_t clk)
 // and MultiSynth 0
 // and produces the output on CLK0
 //
-void si5351aSetFrequency(uint32_t frequency)
+void si5351aSetFrequency(uint32_t frequency, bool reset)
 {
 	uint32_t pllFreq;
 	uint32_t xtalFreq = XTAL_FREQ;
@@ -161,12 +161,15 @@ void si5351aSetFrequency(uint32_t frequency)
 									// If you want to output frequencies below 1MHz, you have to use the 
 									// final R division stage
 	setupMultisynth(SI_SYNTH_MS_0, divider, SI_R_DIV_1);
-									// Reset the PLL. This causes a glitch in the output. For small changes to 
-									// the parameters, you don't need to reset the PLL, and there is no glitch
-	i2cSendRegister(SI_PLL_RESET, 0xA0);	
-									// Finally switch on the CLK0 output (0x4F)
-									// and set the MultiSynth0 input to be PLL A [3:2]
-									// 8ma drive [1:0]
-	i2cSendRegister(SI_CLK0_CONTROL, 0x4F | SI_CLK_SRC_PLL_A);
+
+	if (reset) {
+										// Reset the PLL. This causes a glitch in the output. For small changes to
+										// the parameters, you don't need to reset the PLL, and there is no glitch
+		i2cSendRegister(SI_PLL_RESET, 0xA0);
+										// Finally switch on the CLK0 output (0x4F)
+										// and set the MultiSynth0 input to be PLL A [3:2]
+										// 8ma drive [1:0]
+		i2cSendRegister(SI_CLK0_CONTROL, 0x4F | SI_CLK_SRC_PLL_A);
+	}
 }
 

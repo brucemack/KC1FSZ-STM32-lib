@@ -10,6 +10,6 @@
 
 void si5351aInit(kc1fsz::I2CInterface* i2c);
 void si5351aOutputOff(uint8_t clk);
-void si5351aSetFrequency(uint32_t frequency);
+void si5351aSetFrequency(uint32_t frequency, bool reset);
 
 #endif //SI5351A_H

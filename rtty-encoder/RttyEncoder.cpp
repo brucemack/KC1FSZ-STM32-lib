@@ -43,9 +43,13 @@ void RttyEncoder::start() {
 	_state = State::DELAY;
 	_stateMs = _sysEnv->getTimeMs();
 	_ind->setMessage("Waiting");
+	// Make sure that the VFO is setup
+	_vfo->setFrequency(_baseFreqHz);
+	_vfo->setOutputEnabled(false);
 }
 
 void RttyEncoder::stop() {
+	_vfo->setOutputEnabled(false);
 	_state = State::IDLE;
 	_ind->setMessage("Idle");
 }
@@ -87,6 +91,8 @@ void RttyEncoder::poll() {
 			_outStreamPtr++;
 			// End of message?
 			if (_outStreamPtr == _outStreamSize) {
+				// Shut off the carrier
+				_vfo->setOutputEnabled(false);
 				_state = State::DELAY;
 				_stateMs = now;
 				_ind->setMessage("Waiting");
