@@ -1,5 +1,8 @@
 #include "WsprEncoder.h"
 #include "wspr.h"
+#include <stdio.h>
+
+// http://www.arrl.org/files/file/QEX_Next_Issue/May-June2019/Steber.pdf
 
 // 1.4648 baud
 static const int baudDelayMs = 682;
@@ -19,25 +22,30 @@ WsprEncoder::WsprEncoder(SystemEnv* sysEnv, VFOInterface* vfo, StatusIndicator* 
 :	_sysEnv(sysEnv),
 	_vfo(vfo),
 	_ind(ind),
+	_enabled(false),
 	_outStreamSize(0),
 	_outStreamPtr(0),
 	_symbolDurationMs(baudDelayMs),
-	_stateMs(0),
+	_stateMs(sysEnv->getTimeMs()),
 	_cycleSeconds(120),
+	_lastCycleSecondDisplayed(0),
 	_state(State::IDLE) {
 }
 
 void WsprEncoder::start() {
-	_state = State::TRANSMISSION;
-	// Synchronize to this point
-	_stateMs = _sysEnv->getTimeMs();
-	_ind->setMessage("Sending");
+	_startTransmission();
 }
 
 void WsprEncoder::stop() {
 	_vfo->setOutputEnabled(false);
 	_state = State::IDLE;
-	_ind->setMessage("Idle");
+}
+
+void WsprEncoder::_startTransmission() {
+	_state = State::TRANSMISSION;
+	_outStreamPtr = 0;
+	// Reset the cycle timer
+	_stateMs = _sysEnv->getTimeMs();
 }
 
 /**
@@ -47,21 +55,31 @@ void WsprEncoder::stop() {
 void WsprEncoder::poll() {
 
 	const uint32_t now = _sysEnv->getTimeMs();
+	const int cycleSecond = (now - _stateMs) / 1000;
+
+	// Update the display
+	if (cycleSecond != _lastCycleSecondDisplayed) {
+		char buf[16];
+		if (_state == State::TRANSMISSION) {
+			sprintf(buf,"%3d TX",cycleSecond);
+		} else {
+			sprintf(buf,"%3d   ",cycleSecond);
+		}
+		_ind->setMessage(buf);
+		_lastCycleSecondDisplayed = cycleSecond;
+	}
 
 	if (_state == State::IDLE) {
 		return;
 	} else if (_state == State::DELAY) {
 		// Finished waiting?
 		if (now - _stateMs > (uint32_t)(_cycleSeconds * 1000)) {
-			_state = State::TRANSMISSION;
-			_outStreamPtr = 0;
-			_ind->setMessage("Sending");
+			_startTransmission();
 		}
 	} else if (_state == State::TRANSMISSION) {
 
 		if (_outStreamSize == 0) {
 			_state = State::DELAY;
-			_ind->setMessage("Waiting");
 			return;
 		}
 
@@ -79,7 +97,6 @@ void WsprEncoder::poll() {
 				// Shut off the carrier
 				_vfo->setOutputEnabled(false);
 				_state = State::DELAY;
-				_ind->setMessage("Waiting");
 			}
 		}
 	}

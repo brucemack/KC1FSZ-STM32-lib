@@ -42,11 +42,14 @@ namespace kc1fsz {
 	private:
 
 		void _startSymbol(unsigned char symbol);
+		void _startTransmission();
+
 
 		SystemEnv* const _sysEnv;
 		VFOInterface* const _vfo;
 		StatusIndicator* const _ind;
 
+		bool _enabled;
 		unsigned int _baseFreqHz;
 		static const unsigned int _outStreamCapacity = 162;
 		unsigned char _outStream[_outStreamCapacity];
@@ -58,6 +61,7 @@ namespace kc1fsz {
 		// Used for managing state transitions
 		uint32_t _stateMs;
 		int _cycleSeconds;
+		int _lastCycleSecondDisplayed;
 
 		enum State {
 			IDLE,

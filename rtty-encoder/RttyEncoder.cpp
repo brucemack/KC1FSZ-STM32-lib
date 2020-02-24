@@ -27,6 +27,7 @@ RttyEncoder::RttyEncoder(SystemEnv* sysEnv, VFOInterface* vfo, StatusIndicator* 
 :	_sysEnv(sysEnv),
 	_vfo(vfo),
 	_ind(ind),
+	_enabled(false),
 	_shiftState(false),
 	_outStreamSize(0),
 	_outStreamPtr(0),

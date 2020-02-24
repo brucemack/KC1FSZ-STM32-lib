@@ -70,6 +70,8 @@ namespace kc1fsz {
 		SystemEnv* const _sysEnv;
 		VFOInterface* const _vfo;
 		StatusIndicator* const _ind;
+
+		bool _enabled;
 		bool _shiftState;
 		unsigned int _baseFreqHz;
 		static const unsigned int _outStreamCapacity = 5000;
