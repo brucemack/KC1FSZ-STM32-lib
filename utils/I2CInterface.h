@@ -23,6 +23,8 @@ namespace kc1fsz {
 		I2CInterface(I2C_HandleTypeDef* i2c_handle);
 
 		void write(uint8_t devAddr, uint8_t addr, uint8_t data);
+		void write(uint8_t devAddr, uint8_t addr, uint8_t* data, uint8_t length);
+
 		uint8_t read(uint8_t devAddr, uint8_t addr);
 
 	private:

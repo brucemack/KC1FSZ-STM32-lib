@@ -9,7 +9,13 @@
 #include "I2CInterface.h"
 
 void si5351aInit(kc1fsz::I2CInterface* i2c);
-void si5351aOutputOff(uint8_t clk);
+
+void si5351aOutputEnable(bool enabled);
+
 void si5351aSetFrequency(uint32_t frequency, bool reset);
+
+// Setting parameters directly, assuming that the output multisynth is integer
+void si5351aSetParameters(uint32_t feedback_mult, uint32_t feedback_num, uint32_t feedback_denom,
+	uint8_t output_divider);
 
 #endif //SI5351A_H

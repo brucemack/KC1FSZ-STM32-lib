@@ -33,7 +33,7 @@ RttyEncoder::RttyEncoder(SystemEnv* sysEnv, VFOInterface* vfo, StatusIndicator* 
 	_outStreamPtr(0),
 	_symbolDurationMs(baudDelayMs),
 	_stateMs(0),
-	_delaySeconds(30),
+	_delaySeconds(60),
 	_loop(false),
 	_state(State::IDLE) {
 }
@@ -46,7 +46,7 @@ void RttyEncoder::start() {
 	_stateMs = _sysEnv->getTimeMs();
 	_ind->setMessage("Waiting");
 	// Make sure that the VFO is setup
-	_vfo->setFrequency(_baseFreqHz);
+	_vfo->setFrequency((float)_baseFreqHz);
 	_vfo->setOutputEnabled(false);
 }
 
@@ -122,12 +122,12 @@ void RttyEncoder::_startSymbol(unsigned char symbol) {
 			_ind->setLight(false);
 	} else if (symbol == MARK_SYM) {
 		_vfo->setOutputEnabled(true);
-		_vfo->setFrequency(_baseFreqHz);
+		_vfo->setFrequency((float)_baseFreqHz);
 		if (_ind)
 			_ind->setLight(true);
 	} else if (symbol == SPACE_SYM) {
 		_vfo->setOutputEnabled(true);
-		_vfo->setFrequency(_baseFreqHz - shiftHz);
+		_vfo->setFrequency((float)(_baseFreqHz - shiftHz));
 		if (_ind)
 			_ind->setLight(false);
 	}

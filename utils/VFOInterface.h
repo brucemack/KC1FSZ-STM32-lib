@@ -14,9 +14,10 @@ namespace kc1fsz {
 		virtual void setOutputEnabled(bool e) = 0;
 
 		/**
-		 * Used to set the frequency of output
+		 * Used to set the frequency of output.
+		 * freqHz - Hertz
 		 */
-		virtual void setFrequency(unsigned int freqHz) = 0;
+		virtual void setFrequency(double freqHz) = 0;
 	};
 };
 

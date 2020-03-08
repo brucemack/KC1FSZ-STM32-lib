@@ -1,13 +1,11 @@
 #include "WsprEncoder.h"
-#include "wspr.h"
+#include "wspr2.h"
 #include <stdio.h>
 
 // http://www.arrl.org/files/file/QEX_Next_Issue/May-June2019/Steber.pdf
 
 // 1.4648 baud
 static const int baudDelayMs = 682;
-// The symbols for the 4-FSK protocol (x100)
-static const int symbolFreqs[] = { 0, 146, 293, 439 };
 
 /*
 0 0.0 Hz
@@ -15,6 +13,8 @@ static const int symbolFreqs[] = { 0, 146, 293, 439 };
 2 2.9296 Hz
 3 4.3944 Hz
 */
+// The symbol offsets for the 4-FSK protocol
+static const double symbolFreqs[] = { 0.0000, 1.4648, 2.9296, 4.3944 };
 
 namespace kc1fsz {
 
@@ -46,6 +46,8 @@ void WsprEncoder::_startTransmission() {
 	_outStreamPtr = 0;
 	// Reset the cycle timer
 	_stateMs = _sysEnv->getTimeMs();
+	// Power on the VFO
+	_vfo->setOutputEnabled(true);
 }
 
 /**
@@ -103,8 +105,7 @@ void WsprEncoder::poll() {
 }
 
 void WsprEncoder::_startSymbol(unsigned char symbol) {
-	_vfo->setOutputEnabled(true);
-	_vfo->setFrequency(_baseFreqHz + symbolFreqs[(int)symbol]);
+	_vfo->setFrequency((double)_baseFreqHz + symbolFreqs[(int)symbol]);
 }
 
 void WsprEncoder::setFreq(unsigned int freqHz) {
@@ -112,7 +113,10 @@ void WsprEncoder::setFreq(unsigned int freqHz) {
 }
 
 void WsprEncoder::setParameters(const char* call, const char* grid, int power) {
-	encodeWsprMessage(call, grid, power, _outStream);
+	//encodeWsprMessage(call, grid, power, _outStream);
+	//encodeWsprMessage(call, grid, power, _outStream);
+	wspr_encode(call, grid, 7, _outStream);
+
 	_outStreamSize = 162;
 }
 

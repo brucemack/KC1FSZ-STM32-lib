@@ -6,16 +6,18 @@
 #include <stdint.h>
 
 
-#define SI_CLK0_CONTROL	16			// Register definitions
-#define SI_CLK1_CONTROL	17
-#define SI_CLK2_CONTROL	18
-#define SI_SYNTH_PLL_A	26
-#define SI_SYNTH_PLL_B	34
-#define SI_SYNTH_MS_0 42
-#define SI_SYNTH_MS_1 50
-#define SI_SYNTH_MS_2 58
-#define SI_PLL_RESET 177
+#define SI_OUTPUT_ENABLE	3
+#define SI_CLK0_CONTROL		16			// Register definitions
+#define SI_CLK1_CONTROL		17
+#define SI_CLK2_CONTROL		18
+#define SI_SYNTH_PLL_A		26
+#define SI_SYNTH_PLL_B		34
+#define SI_SYNTH_MS_0 		42
+#define SI_SYNTH_MS_1 		50
+#define SI_SYNTH_MS_2 		58
+#define SI_PLL_RESET 		177
 #define SI_CRYSTAL_INTERNAL_LOAD_CAPACITANCE 183
+
 
 #define SI_R_DIV_1			0b00000000			// R-division ratio definitions
 #define SI_R_DIV_2			0b00010000
@@ -113,9 +115,15 @@ void setupMultisynth(uint8_t synth, uint32_t divider, uint8_t rDiv)
 // Example: si5351aOutputOff(SI_CLK0_CONTROL);
 // will switch off output CLK0
 //
-void si5351aOutputOff(uint8_t clk)
+void si5351aOutputEnable(bool enabled)
 {
-	i2cSendRegister(clk, 0x80);		// Refer to SiLabs AN619 to see bit values - 0x80 turns off the output stage
+	//i2cSendRegister(clk, 0x80);		// Refer to SiLabs AN619 to see bit values - 0x80 turns off the output stage
+
+	// 0=enabled, 1=disabled
+	if (enabled)
+		i2cSendRegister(SI_OUTPUT_ENABLE, 0x06);
+	else
+		i2cSendRegister(SI_OUTPUT_ENABLE, 0x07);
 }
 
 // 
@@ -139,7 +147,7 @@ void si5351aSetFrequency(uint32_t frequency, bool reset)
 	uint32_t denom;
 	uint32_t divider;
 
-	divider = 900000000 / frequency;// Calculate the division ratio. 900,000,000 is the maximum internal 
+	divider = 900000000 / frequency; // Calculate the division ratio. 900,000,000 is the maximum internal
 									// PLL frequency: 900MHz
 	if (divider % 2) divider--;		// Ensure an even integer division ratio
 
@@ -171,5 +179,10 @@ void si5351aSetFrequency(uint32_t frequency, bool reset)
 										// 8ma drive [1:0]
 		i2cSendRegister(SI_CLK0_CONTROL, 0x4F | SI_CLK_SRC_PLL_A);
 	}
+}
+
+void si5351aSetParameters(uint32_t mult, uint32_t num, uint32_t denom, uint8_t divider) {
+	setupPLL(SI_SYNTH_PLL_A, mult, num, denom);
+	setupMultisynth(SI_SYNTH_MS_0, divider, SI_R_DIV_1);
 }
 
