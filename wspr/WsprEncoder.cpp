@@ -1,5 +1,5 @@
 #include "WsprEncoder.h"
-#include "wspr2.h"
+//#include "wspr2.h"
 #include <stdio.h>
 
 // http://www.arrl.org/files/file/QEX_Next_Issue/May-June2019/Steber.pdf
@@ -115,7 +115,7 @@ void WsprEncoder::setFreq(unsigned int freqHz) {
 void WsprEncoder::setParameters(const char* call, const char* grid, int power) {
 	//encodeWsprMessage(call, grid, power, _outStream);
 	//encodeWsprMessage(call, grid, power, _outStream);
-	wspr_encode(call, grid, 7, _outStream);
+	//wspr_encode(call, grid, 7, _outStream);
 
 	_outStreamSize = 162;
 }
