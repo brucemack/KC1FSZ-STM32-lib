@@ -17,7 +17,15 @@ namespace kc1fsz {
 
 		bool getState();
 
+		/**
+		 * This will only return true for one call per transition.
+		 */
 		bool isEdge();
+
+		/**
+		 * Returns how long we were in the high state
+		 */
+		unsigned int getHighMs();
 
 	private:
 
@@ -27,6 +35,7 @@ namespace kc1fsz {
 		bool _stableState;
 		bool _isEdge;
 		unsigned int _windowMs;
+		unsigned int _highStartMs;
 	};
 
 };
