@@ -27,7 +27,15 @@ namespace kc1fsz {
 		 */
 		void setFreq(unsigned int freqHz);
 
-		void setParameters(const char* call, const char* grid, int power);
+		/**
+		 * Sets the offset frequency for the transmission.
+		 */
+		void setOffsetFreq(unsigned int offsetFreqHz);
+
+		/**
+		 * Sets the callsign, location, and power
+		 */
+		void setParameters(const char* call, const char* grid, int powerDbm);
 
 		/**
 		 * Starts the message loop
@@ -50,7 +58,10 @@ namespace kc1fsz {
 		StatusIndicator* const _ind;
 
 		bool _enabled;
+		// For 40m: 7038.600
 		unsigned int _baseFreqHz;
+		// Generally around 1,500 Hz
+		unsigned int _offsetFreqHz;
 		static const unsigned int _outStreamCapacity = 162;
 		unsigned char _outStream[_outStreamCapacity];
 		unsigned int _outStreamSize;

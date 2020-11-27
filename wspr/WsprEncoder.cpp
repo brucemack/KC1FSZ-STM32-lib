@@ -1,5 +1,5 @@
 #include "WsprEncoder.h"
-//#include "wspr2.h"
+#include "JTEncode.h"
 #include <stdio.h>
 
 // http://www.arrl.org/files/file/QEX_Next_Issue/May-June2019/Steber.pdf
@@ -16,6 +16,9 @@ static const int baudDelayMs = 682;
 // The symbol offsets for the 4-FSK protocol
 static const double symbolFreqs[] = { 0.0000, 1.4648, 2.9296, 4.3944 };
 
+// The actual encoder from Etherkit
+static JTEncode jtencode;
+
 namespace kc1fsz {
 
 WsprEncoder::WsprEncoder(SystemEnv* sysEnv, VFOInterface* vfo, StatusIndicator* ind)
@@ -23,11 +26,15 @@ WsprEncoder::WsprEncoder(SystemEnv* sysEnv, VFOInterface* vfo, StatusIndicator* 
 	_vfo(vfo),
 	_ind(ind),
 	_enabled(false),
+	_baseFreqHz(0),
+	_offsetFreqHz(1500),
 	_outStreamSize(0),
 	_outStreamPtr(0),
 	_symbolDurationMs(baudDelayMs),
 	_stateMs(sysEnv->getTimeMs()),
-	_cycleSeconds(120),
+	//_cycleSeconds(120),
+	// We run on a 4 minute cycle to give the finals some time to cool off
+	_cycleSeconds(240),
 	_lastCycleSecondDisplayed(0),
 	_state(State::IDLE) {
 }
@@ -65,7 +72,7 @@ void WsprEncoder::poll() {
 		if (_state == State::TRANSMISSION) {
 			sprintf(buf,"%3d TX",cycleSecond);
 		} else {
-			sprintf(buf,"%3d   ",cycleSecond);
+			sprintf(buf,"%3d Wait",cycleSecond);
 		}
 		_ind->setMessage(buf);
 		_lastCycleSecondDisplayed = cycleSecond;
@@ -98,6 +105,7 @@ void WsprEncoder::poll() {
 			if (_outStreamPtr == _outStreamSize) {
 				// Shut off the carrier
 				_vfo->setOutputEnabled(false);
+				// Delay until  the start of the next cycle
 				_state = State::DELAY;
 			}
 		}
@@ -105,18 +113,19 @@ void WsprEncoder::poll() {
 }
 
 void WsprEncoder::_startSymbol(unsigned char symbol) {
-	_vfo->setFrequency((double)_baseFreqHz + symbolFreqs[(int)symbol]);
+	_vfo->setFrequency((double)_baseFreqHz + (double)_offsetFreqHz + symbolFreqs[(int)symbol]);
 }
 
-void WsprEncoder::setFreq(unsigned int freqHz) {
-	_baseFreqHz = freqHz;
+void WsprEncoder::setFreq(unsigned int baseFreqHz) {
+	_baseFreqHz = baseFreqHz;
+}
+
+void WsprEncoder::setOffsetFreq(unsigned int offsetFreqHz) {
+	_offsetFreqHz = offsetFreqHz;
 }
 
 void WsprEncoder::setParameters(const char* call, const char* grid, int power) {
-	//encodeWsprMessage(call, grid, power, _outStream);
-	//encodeWsprMessage(call, grid, power, _outStream);
-	//wspr_encode(call, grid, 7, _outStream);
-
+	jtencode.wspr_encode(call, grid, power, _outStream);
 	_outStreamSize = 162;
 }
 
