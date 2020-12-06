@@ -2,10 +2,10 @@
 #define _WsprEncoder_h
 
 #include <stdint.h>
-#include "SystemEnv.h"
-#include "VFOInterface.h"
-#include "Pollable.h"
-#include "StatusIndicator.h"
+#include "utils/SystemEnv.h"
+#include "utils/VFOInterface.h"
+#include "utils/Pollable.h"
+#include "utils/StatusIndicator.h"
 
 namespace kc1fsz {
 
