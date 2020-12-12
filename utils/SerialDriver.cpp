@@ -1,4 +1,6 @@
-#include "string.h"
+#include <string.h>
+#include <stdio.h>
+
 #include "utils/SerialDriver.h"
 
 #define SEND_TIMEOUT_MS 5
@@ -7,7 +9,8 @@ SerialDriver::SerialDriver(UART_HandleTypeDef* huart)
 :	_huart(huart),
 	_eomDelimPtr(0),
 	_eomDelimSize(0),
-	_messageBufferPtr(0) {
+	_messageBufferPtr(0),
+	_echo(true) {
 }
 
 void SerialDriver::start() {
@@ -44,6 +47,18 @@ int SerialDriver::send(const char* message) {
 void SerialDriver::_onReceive(uint8_t data) {
 	// Save received data
 	_messageBuffer[_messageBufferPtr++] = (char)_receiveBuffer;
+	if (_echo) {
+		// Echo
+		char echoMsg[16];
+		echoMsg[0] = data;
+		echoMsg[1] = 0;
+		send(echoMsg);
+		// Make sure the CR gets a LF
+		if (data == 13) {
+			echoMsg[0] = 10;
+			send(echoMsg);
+		}
+	}
 	// Figure out if a complete message has been received
 	if ((char)data == _eomDelim[_eomDelimPtr]) {
 		// Still successful, move forward

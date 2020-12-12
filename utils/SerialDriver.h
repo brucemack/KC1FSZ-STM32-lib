@@ -54,6 +54,8 @@ private:
 
 	// Called when a complete message is received
 	MessageHandler* _messageHandler;
+
+	bool _echo;
 };
 
 #endif /* INC_SERIALDRIVER_H_ */
